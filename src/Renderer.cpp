@@ -9,7 +9,7 @@
 #include "Primitive.hpp"
 #include "Light.hpp"
 
-struct ObjectManifold {
+struct HitData {
     Primitive *object;
     float distance;
 };
@@ -38,8 +38,8 @@ void Renderer::clear() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-ObjectManifold traceObjects(Ray *ray, Scene *scene) {
-    ObjectManifold result;
+HitData traceObjects(Ray *ray, Scene *scene) {
+    HitData result;
     result.distance = INFINITY;
     result.object = nullptr;
     for (Primitive *p : scene->sceneObjects()) {
@@ -52,12 +52,12 @@ ObjectManifold traceObjects(Ray *ray, Scene *scene) {
     return result;
 }
 
-glm::vec3 traceLight(Ray *ray, Scene *scene, ObjectManifold currentObject) {
+glm::vec3 traceLight(Ray *ray, Scene *scene, HitData hit) {
     static const float bias = 1e-4;  
     float illumination = 0.0f;
-    glm::vec3 ambientLight = 0.1f * currentObject.object->color();
-    glm::vec3 surfacePoint  = ray->origin() + (ray->direction() * currentObject.distance);
-    glm::vec3 surfaceNormal = currentObject.object->normal(surfacePoint); 
+    glm::vec3 ambientLight = 0.1f * hit.object->color();
+    glm::vec3 surfacePoint  = ray->origin() + (ray->direction() * hit.distance);
+    glm::vec3 surfaceNormal = hit.object->normal(surfacePoint); 
     for (Light *light : scene->sceneLights()) {
         Ray shadowRay;
         shadowRay.setDirection(light->position() - surfacePoint);
@@ -73,12 +73,12 @@ glm::vec3 traceLight(Ray *ray, Scene *scene, ObjectManifold currentObject) {
         }
         if (!obstructed) {
             float attenuation = (1.0f / pow(distanceFromLight, 2)) * light->intensity();  
-            float incidence = glm::dot(surfaceNormal, currentObject.object->normal(light->position())); 
+            float incidence = glm::dot(surfaceNormal, hit.object->normal(light->position())); 
             attenuation = attenuation > 1.0f ? 1.0f : attenuation;
             illumination += attenuation * incidence;
         }
     }
-    return ambientLight + (currentObject.object->color() * illumination);
+    return ambientLight + (hit.object->color() * illumination);
 }
 
 void Renderer::drawScene(Scene *scene) {
@@ -102,26 +102,26 @@ void Renderer::drawScene(Scene *scene) {
         for (int x = 0; x < s_canvas_width; x += 1) {
             glm::vec3 horizontalOffset = (float)x * right_increment;
             s_ray.setDirection(canvas_top_left + verticalOffset + horizontalOffset);
-            ObjectManifold closestObject = traceObjects(&s_ray, scene);
+            HitData hit = traceObjects(&s_ray, scene);
             
             // calculate the light contribution to the pixel
-            if (closestObject.distance != INFINITY) {
+            if (hit.distance != INFINITY) {
                 
                 // compute portion of pixel colour based colour ccontribution 
                 // from light sources
-                glm::vec3 surfaceColor = traceLight(&s_ray, scene, closestObject);
+                glm::vec3 surfaceColor = traceLight(&s_ray, scene, hit);
 
                 // calculate angle of reflection
                 float bias = 1e-4;
-                glm::vec3 hitPos = s_ray.origin() + (s_ray.direction() * closestObject.distance);
-                glm::vec3 surfaceNormal = closestObject.object->normal(hitPos);                
+                glm::vec3 hitPos = s_ray.origin() + (s_ray.direction() * hit.distance);
+                glm::vec3 surfaceNormal = hit.object->normal(hitPos);                
                 Ray reflectRay;
                 reflectRay.setDirection(glm::reflect(s_ray.direction(), surfaceNormal));
                 reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
 
                 // compute porition of pixel colour based on color contribution 
                 // from surrounding objects (reflection)
-                ObjectManifold reflectObject = traceObjects(&reflectRay, scene);
+                HitData reflectObject = traceObjects(&reflectRay, scene);
                 if (reflectObject.distance != INFINITY) {
                     glm::vec3 reflectColor = traceLight(&reflectRay, scene, reflectObject);
                     // color pixel with both color contributions
