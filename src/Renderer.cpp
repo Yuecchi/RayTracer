@@ -14,11 +14,13 @@ struct HitData {
     float distance;
 };
 
-
 bool Renderer::s_init = false;
 unsigned int Renderer::s_canvas_width;
 unsigned int Renderer::s_canvas_height;
 Ray Renderer::s_ray;
+
+glm::vec3 trace(Ray *ray, Scene *scane, unsigned int depth);
+glm::vec3 shade(Ray *ray, Scene *scane, Primitive *hitObject, float hitDistance, unsigned int depth);
 
 void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
     if (!s_init) {
@@ -38,34 +40,34 @@ void Renderer::clear() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-HitData traceObjects(Ray *ray, Scene *scene) {
-    HitData result;
-    result.distance = INFINITY;
-    result.object = nullptr;
+glm::vec3 trace(Ray *ray, Scene *scene, unsigned int depth) {
+    glm::vec3 color = glm::vec3(0.0f, 0.0f, 0.0f); // background color
+    float hitDistance = INFINITY;
+    Primitive *hitObject = nullptr;
     for (Primitive *p : scene->sceneObjects()) {
         float distance = p->rayIntersect(ray);
-        if (distance < result.distance) {
-            result.distance = distance;
-            result.object = p;
+        if (distance < hitDistance) {
+            hitDistance = distance;
+            hitObject = p;
         }
     }
-    return result;
+    if (hitDistance == INFINITY) return color; // no object found by ray
+    else return shade(ray, scene, hitObject, hitDistance, depth);
 }
 
-glm::vec3 traceLight(Ray *ray, Scene *scene, HitData hit) {
-    static const float bias = 1e-4;  
-    float illumination = 0.0f;
-    glm::vec3 ambientLight = 0.1f * hit.object->color();
-    glm::vec3 surfacePoint  = ray->origin() + (ray->direction() * hit.distance);
-    glm::vec3 surfaceNormal = hit.object->normal(surfacePoint); 
+glm::vec3 shade(Ray *ray, Scene * scene, Primitive *hitObject, float hitDistance, unsigned int depth) {
+    static const float bias = 1e-4;
+    glm::vec3 color = 0.1f * hitObject->color(); // ambient
+    glm::vec3 hitPos = ray->origin() + (ray->direction() * hitDistance);
+    glm::vec3 surfaceNormal = hitObject->normal(hitPos);
     for (Light *light : scene->sceneLights()) {
-        Ray shadowRay;
-        shadowRay.setDirection(light->position() - surfacePoint);
-        shadowRay.setOrigin(surfacePoint + (bias * surfaceNormal));
-        float distanceFromLight = glm::distance(light->position(), surfacePoint);
+        float distanceFromLight = glm::distance(light->position(), hitPos);
+        Ray lightRay;
+        lightRay.setDirection(light->position() - hitPos);
+        lightRay.setOrigin(hitPos + (bias * surfaceNormal));
         bool obstructed = false;
         for (Primitive *p : scene->sceneObjects()) {
-            float obstruction = p->rayIntersect(&shadowRay);
+            float obstruction = p->rayIntersect(&lightRay);
             if (obstruction != INFINITY && (distanceFromLight - obstruction) > bias) {
                 obstructed = true;
                 break;
@@ -73,12 +75,20 @@ glm::vec3 traceLight(Ray *ray, Scene *scene, HitData hit) {
         }
         if (!obstructed) {
             float attenuation = (1.0f / pow(distanceFromLight, 2)) * light->intensity();  
-            float incidence = glm::dot(surfaceNormal, hit.object->normal(light->position())); 
+            float incidence = glm::dot(surfaceNormal, hitObject->normal(light->position())); 
             attenuation = attenuation > 1.0f ? 1.0f : attenuation;
-            illumination += attenuation * incidence;
+            color += hitObject->color() * (attenuation * incidence);
         }
     }
-    return ambientLight + (hit.object->color() * illumination);
+    // reflection
+    if (depth > 0) {
+        Ray reflectRay;
+        reflectRay.setDirection(glm::reflect(ray->direction(), surfaceNormal));
+        reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
+        color += trace(&reflectRay, scene, depth - 1);
+    }
+
+    return color;
 }
 
 void Renderer::drawScene(Scene *scene) {
@@ -102,35 +112,7 @@ void Renderer::drawScene(Scene *scene) {
         for (int x = 0; x < s_canvas_width; x += 1) {
             glm::vec3 horizontalOffset = (float)x * right_increment;
             s_ray.setDirection(canvas_top_left + verticalOffset + horizontalOffset);
-            HitData hit = traceObjects(&s_ray, scene);
-            
-            // calculate the light contribution to the pixel
-            if (hit.distance != INFINITY) {
-                
-                // compute portion of pixel colour based colour ccontribution 
-                // from light sources
-                glm::vec3 surfaceColor = traceLight(&s_ray, scene, hit);
-
-                // calculate angle of reflection
-                float bias = 1e-4;
-                glm::vec3 hitPos = s_ray.origin() + (s_ray.direction() * hit.distance);
-                glm::vec3 surfaceNormal = hit.object->normal(hitPos);                
-                Ray reflectRay;
-                reflectRay.setDirection(glm::reflect(s_ray.direction(), surfaceNormal));
-                reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
-
-                // compute porition of pixel colour based on color contribution 
-                // from surrounding objects (reflection)
-                HitData reflectObject = traceObjects(&reflectRay, scene);
-                if (reflectObject.distance != INFINITY) {
-                    glm::vec3 reflectColor = traceLight(&reflectRay, scene, reflectObject);
-                    // color pixel with both color contributions
-                    Renderer::put_pixel(x, y, (0.5f * reflectColor) + surfaceColor);
-                } else {
-                    // color pixel with single color contribution
-                    Renderer::put_pixel(x, y, surfaceColor);
-                }
-            }
+            put_pixel(x, y, trace(&s_ray, scene, 4));
         }
     }
 }
