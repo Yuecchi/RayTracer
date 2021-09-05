@@ -9,11 +9,6 @@
 #include "Primitive.hpp"
 #include "Light.hpp"
 
-struct HitData {
-    Primitive *object;
-    float distance;
-};
-
 bool Renderer::s_init = false;
 unsigned int Renderer::s_canvas_width;
 unsigned int Renderer::s_canvas_height;
