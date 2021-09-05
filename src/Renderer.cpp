@@ -91,7 +91,7 @@ void Renderer::drawScene(Scene *scene) {
     float aspect = (float)s_canvas_width / (float)s_canvas_height;
 
     // setup canvas
-    glm::vec3 canvas_center = scene->camera().position() + scene->camera().direction();
+    glm::vec3 canvas_center = scene->camera().direction();
     glm::vec3 canvas_top_left = (canvas_center - scene->camera().right() + scene->camera().up());
     glm::vec3 canvas_top_right = (canvas_center + scene->camera().right() + scene->camera().up());
     glm::vec3 canvas_bottom_left = canvas_top_left - (2.0f * scene->camera().up());

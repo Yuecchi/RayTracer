@@ -23,6 +23,12 @@ class Camera {
 
         glm::vec3 &right();
 
+        void setPosition(glm::vec3 position);
+
+        void rotate(float theta);
+
+        void move(glm::vec3 v);
+
         ~Camera();
 
 };
