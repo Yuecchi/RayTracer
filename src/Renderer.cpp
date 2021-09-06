@@ -14,8 +14,8 @@ unsigned int Renderer::s_canvas_width;
 unsigned int Renderer::s_canvas_height;
 Ray Renderer::s_ray;
 
-glm::vec3 trace(Ray *ray, Scene *scane, unsigned int depth);
-glm::vec3 shade(Ray *ray, Scene *scane, Primitive *hitObject, float hitDistance, unsigned int depth);
+glm::vec3 trace(Ray *ray, Scene *scene, unsigned int depth);
+glm::vec3 shade(Ray *ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth);
 
 void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
     if (!s_init) {
