@@ -25,11 +25,11 @@ float Sphere::rayIntersect(Ray *ray) {
 	else return INFINITY;
 }
 
-glm::vec3 Sphere::normal(glm::vec3 v) {
+glm::vec3 Sphere::normal(const glm::vec3 &v) {
 	return glm::normalize(v - m_position);
 }
 
-glm::vec3 Sphere::color() {
+glm::vec3 &Sphere::color() {
 	return m_color;
 }
 

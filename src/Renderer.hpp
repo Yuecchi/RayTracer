@@ -24,6 +24,6 @@ class Renderer {
         
         static void drawScene(Scene *scene);
 
-        static void put_pixel(float x, float y, glm::vec3 color);
+        static void put_pixel(float x, float y, const glm::vec3 &color);
 
 };

@@ -26,11 +26,11 @@ float Plane::rayIntersect(Ray *ray) {
 	return INFINITY;
 }
 
-glm::vec3 Plane::normal(glm::vec3 v) {
+glm::vec3 Plane::normal(const glm::vec3 &v) {
 	return m_normal;
 }
 
-glm::vec3 Plane::color() {
+glm::vec3 &Plane::color() {
 	return m_color;
 }
 

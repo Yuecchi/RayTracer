@@ -18,9 +18,9 @@ class Plane : public Primitive {
 
         float rayIntersect(Ray *ray);
 
-        glm::vec3 normal(glm::vec3 v);
+        glm::vec3 normal(const glm::vec3 &v);
 
-        glm::vec3 color();
+        glm::vec3 &color();
 
         ~Plane();
 

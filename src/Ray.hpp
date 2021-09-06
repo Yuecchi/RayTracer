@@ -13,11 +13,9 @@ class Ray {
 
         Ray();
 
-        void setOrigin(glm::vec3 v);
+        void setOrigin(const glm::vec3 &v);
 
-        void setDirection(float x, float y, float z);
-
-        void setDirection(glm::vec3 v);
+        void setDirection(const glm::vec3 &v);
         
         void normalize();
 

@@ -44,7 +44,7 @@ void Application::run() {
         Renderer::clear();
         timeElapsed = clock();
         Renderer::drawScene(scene);
-        scene->camera().rotate(3.141f / 45.0f);
+        //scene->camera().rotate(3.141f / 45.0f);
         currentTime = clock();
         std::cout << 1.0f / ((float)(currentTime - timeElapsed)/CLOCKS_PER_SEC) << "\n";
         m_window->update(); 

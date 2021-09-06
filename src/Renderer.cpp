@@ -101,21 +101,23 @@ void Renderer::drawScene(Scene *scene) {
     glm::vec3 right_increment = (((canvas_top_right - canvas_top_left) / (float)s_canvas_width)) * aspect;
     glm::vec3 down_increment  = ((canvas_bottom_left - canvas_top_left) / (float)s_canvas_height);
     
+    glm::vec3 verticalOffset, horizontalOffset, direction;
+    glBegin(GL_POINTS);
     s_ray.setOrigin(scene->camera().position());
     for (int y = 0; y < s_canvas_height; y += 1) {
-        glm::vec3 verticalOffset = (float)y * down_increment;
+        verticalOffset = (float)y * down_increment;
         for (int x = 0; x < s_canvas_width; x += 1) {
-            glm::vec3 horizontalOffset = (float)x * right_increment;
-            s_ray.setDirection(canvas_top_left + verticalOffset + horizontalOffset);
+            horizontalOffset = (float)x * right_increment;
+            direction = canvas_top_left + verticalOffset + horizontalOffset;
+            s_ray.setDirection(direction);
             put_pixel(x, y, trace(&s_ray, scene, 4));
         }
     }
+    glEnd();
 }
 
-void Renderer::put_pixel(float x, float y, glm::vec3 color) {
-    glBegin(GL_POINTS);
+void Renderer::put_pixel(float x, float y, const glm::vec3 &color) {  
     glColor3f(color.r, color.g, color.b);
     glVertex2f(x, y);
-    glEnd();
 }
 
