@@ -32,7 +32,7 @@ class ThreadPool {
 
         std::vector<std::thread> m_threads;
         std::queue<Job*> m_jobs;
-        static const unsigned int MAX_THREADS = 4;
+        static const unsigned int MAX_THREADS = 16;
 
         std::atomic<int> m_jobsCompleted;
 
