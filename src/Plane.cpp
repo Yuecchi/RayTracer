@@ -12,10 +12,10 @@ Plane::Plane(glm::vec3 normal, float distance, glm::vec3 color) {
 	m_color = color;
 }
 
-float Plane::rayIntersect(Ray *ray) {
-	float denom = glm::dot(ray->direction(), m_normal);
+float Plane::rayIntersect(Ray ray) {
+	float denom = glm::dot(ray.direction(), m_normal);
 	if (fabs(denom) > 1e-6) {
-		glm::vec3 w = m_origin - ray->origin();
+		glm::vec3 w = m_origin - ray.origin();
 		float numer = glm::dot(w, m_normal);
 		float t = numer / denom;
 		if (t >= 1e-6) {

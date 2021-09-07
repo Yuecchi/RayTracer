@@ -10,11 +10,11 @@ Sphere::Sphere(glm::vec3 position, float radius, glm::vec3 color) {
 	m_color = color;
 }
 
-float Sphere::rayIntersect(Ray *ray) {
-	glm::vec3 w = ray->origin() - m_position;
+float Sphere::rayIntersect(Ray ray) {
+	glm::vec3 w = ray.origin() - m_position;
 
-	float a = glm::dot(ray->direction(), ray->direction());
-	float b = glm::dot(ray->direction(), w);
+	float a = glm::dot(ray.direction(), ray.direction());
+	float b = glm::dot(ray.direction(), w);
 	float c = glm::dot(w, w) - (m_radius * m_radius);
 
 	float discr = (b * b) - (a * c);
