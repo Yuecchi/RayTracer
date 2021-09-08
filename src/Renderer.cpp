@@ -18,7 +18,7 @@
     #undef SINGLE
 #endif
 
-bool Renderer::s_init = false;
+bool Renderer::s_init = false; 
 
 unsigned int Renderer::s_canvas_width;
 unsigned int Renderer::s_canvas_height;
@@ -26,12 +26,13 @@ Ray Renderer::s_ray;
 
 ThreadPool Renderer::s_threadPool;
 std::mutex Renderer::s_mutex;
-std::condition_variable Renderer::s_cond;
+std::condition_variable Renderer::s_cond; 
 glm::vec3 **Renderer::s_buffer;
 Job **Renderer::s_jobs;
 
 glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth);
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth);
+int scale = 1;
 
 void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
     if (!s_init) {
@@ -42,18 +43,18 @@ void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
         std::cout <<  "GLEW Initialized\n"; 
         s_init = true;
     }
-    s_canvas_width = canvas_width;
-    s_canvas_height = canvas_height;
+    s_canvas_width = canvas_width * scale;
+    s_canvas_height = canvas_height * scale;
     glOrtho(0.0, (double)canvas_width, (double)canvas_height, 0.0, 0.0, 1.0); 
 
-    s_buffer = new glm::vec3*[canvas_width];
-    s_jobs = new Job*[canvas_width];
-    for (int i = 0; i < canvas_width; i += 1) {
-        s_buffer[i] = new glm::vec3[canvas_height];
-        s_jobs[i] = new Job[canvas_height];
+    s_buffer = new glm::vec3*[s_canvas_width];
+    s_jobs = new Job*[s_canvas_width];
+    for (int i = 0; i < s_canvas_width; i += 1) {
+        s_buffer[i] = new glm::vec3[s_canvas_height];
+        s_jobs[i] = new Job[s_canvas_height];
     }
 
-    s_threadPool.start(&s_mutex, &s_cond, canvas_width * canvas_height); 
+    s_threadPool.start(&s_mutex, &s_cond, s_canvas_width * s_canvas_height); 
 }
 
 void Renderer::clear() {
@@ -148,12 +149,12 @@ void Renderer::drawScene(Scene *scene) {
     glm::vec3 down_increment  = ((canvas_bottom_left - canvas_top_left) / (float)s_canvas_height);
     
     glm::vec3 verticalOffset, horizontalOffset, direction;
-    glBegin(GL_POINTS);
+    
     s_ray.setOrigin(scene->camera().position());
     for (int y = 0; y < s_canvas_height; y += 1) {
         verticalOffset = (float)y * down_increment;
         for (int x = 0; x < s_canvas_width; x += 1) {  
-            horizontalOffset = (float)x * right_increment;
+            horizontalOffset = (float)x * right_increment;  
 #ifdef SINGLE
             glm::vec3 direction = canvas_top_left + verticalOffset + horizontalOffset;
             s_ray.setDirection(direction);
@@ -161,29 +162,41 @@ void Renderer::drawScene(Scene *scene) {
 #endif
 #ifdef MULTI
             makeJob(&s_jobs[x][y], s_ray, canvas_top_left, verticalOffset, horizontalOffset, scene, &s_buffer[x][y]);
-            s_threadPool.submit(&s_jobs[x][y]);
+            s_threadPool.submit(&s_jobs[x][y]);  
 #endif
         }
     }
 
-#ifdef MULTI
-    // wait for thread pool to finish work here
-    std::unique_lock<std::mutex> lock(s_mutex);
-    s_cond.wait(lock, [](){ return s_threadPool.jobsCompleted() == s_threadPool.jobSize(); });
-    s_threadPool.resetJobCount();
-#endif
+#ifdef MULTI 
+    // wait for thread pool to finish computing all the colors
+    // for each pixel  
+    std::unique_lock<std::mutex> lock(s_mutex);  
+    s_cond.wait(lock, [](){ return s_threadPool.jobsCompleted() == s_threadPool.jobSize(); });   
+    s_threadPool.resetJobCount();  
+#endif 
 
-    for (int y = 0; y < s_canvas_height; y += 1) {
-        for (int x = 0; x < s_canvas_width; x += 1) {
-            put_pixel(x, y, s_buffer[x][y]);
+    glBegin(GL_POINTS);
+    for (int y = 0; y < s_canvas_height; y += scale) {       
+        for (int x = 0; x < s_canvas_width; x += scale) {   
+            put_pixel(x, y, s_buffer[x][y]);  
+            
+            /*
+            int count = 0;
+            glm::vec3 color = glm::vec3(0.0f); 
+            for (int i = 0; i < scale; i += 1) {
+                for (int j = 0; j < scale; j += 1) { 
+                    color += s_buffer[x + j][y + i]; 
+                    count++;
+                }
+            }
+            put_pixel(x / scale, y / scale, color / (float)count);
+            */  
         }
     }
-
-    glEnd();
+    glEnd();  
 }
 
 void Renderer::put_pixel(float x, float y, const glm::vec3 &color) {  
     glColor3f(color.r, color.g, color.b);
     glVertex2f(x, y);
 }
-

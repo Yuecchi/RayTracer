@@ -30,28 +30,38 @@ class ThreadPool {
         std::mutex *m_mainMutex;
         std::condition_variable *m_mainCond;
 
+        static const unsigned int MAX_THREADS = 4;
         std::vector<std::thread> m_threads;
-        std::queue<Job*> m_jobs;
-        static const unsigned int MAX_THREADS = 2;
+        std::queue<Job*> m_jobQueue[MAX_THREADS];    
 
         std::atomic<int> m_jobsCompleted;
         int m_jobSize; 
 
-        void run() {
+        void run(std::queue<Job*> *jobQueue) {
             Job *job;
+
             while (true) {
+                // if the thread is not currently working, it will simply
+                // wait until it is notified to do so by the main thread,
+                // which will happen when all work queues have been filled.
                 {
                     std::unique_lock<std::mutex> lock(m_mutex);
-                    m_cond.wait(lock, [this](){ return !m_jobs.empty(); });
-                    job = m_jobs.front();
-                    m_jobs.pop();
+                    m_cond.wait(lock);
                 }
-
-                job->ray.setDirection(job->directionComponents[0] + job->directionComponents[1] + job->directionComponents[2]);
-                *(job->color) = job->func(job->ray, job->scene, job->depth);
-                m_jobsCompleted++;
-                if (m_jobsCompleted == m_jobSize) {
-                    m_mainCond->notify_one();
+                while (!jobQueue->empty()) {
+                    // the thread will now proceed to complete all jobs 
+                    // within its work queue
+                    job = jobQueue->front();
+                    jobQueue->pop();
+                    job->ray.setDirection(job->directionComponents[0] + job->directionComponents[1] + job->directionComponents[2]);
+                    *(job->color) = job->func(job->ray, job->scene, job->depth);  
+                    // every time a job is completed a counter tracking the 
+                    // total work done is incremented. Once all jobs have 
+                    // been completed the main thread will be notified.
+                    m_jobsCompleted++;
+                    if (m_jobsCompleted == m_jobSize) {
+                        m_mainCond->notify_one();
+                    }
                 }
             }
         }
@@ -62,22 +72,24 @@ class ThreadPool {
 
         void start(std::mutex *mutex, std::condition_variable *cond, int jobSize) {
             m_jobsCompleted = 0;
-            m_mainMutex = mutex;
-            m_mainCond = cond;
-            m_jobSize = jobSize;
-
+            m_mainMutex     = mutex;
+            m_mainCond      = cond;
+            m_jobSize       = jobSize;
             for (int i = 0; i < MAX_THREADS; i  += 1) {
-                m_threads.push_back(std::thread(&ThreadPool::run, this));
+                m_threads.push_back(std::thread(&ThreadPool::run, this, &m_jobQueue[i]));
             }
-
         }
 
         void submit(Job *job) {
-            {
-                std::lock_guard<std::mutex> lock(m_mutex);
-                m_jobs.push(job);
+            static int jobsSent = 0;
+            static int currentQueue = 0;
+            m_jobQueue[currentQueue].push(job);
+            currentQueue = (currentQueue + 1) % MAX_THREADS;
+            jobsSent++;
+            if (jobsSent == m_jobSize) {
+                m_cond.notify_all();
+                jobsSent = 0;
             }
-            m_cond.notify_one();
         }
 
         int jobsCompleted() {
