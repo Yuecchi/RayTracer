@@ -32,9 +32,9 @@ class ThreadPool {
 
         std::vector<std::thread> m_threads;
         std::queue<Job*> m_jobs;
-        static const unsigned int MAX_THREADS = 16;
+        static const unsigned int MAX_THREADS = 2;
 
-        std::atomic<int> m_jobsCompleted;
+        std::atomic<int> m_jobsCompleted; 
 
         void run() {
             Job *job;
@@ -49,7 +49,7 @@ class ThreadPool {
                 job->ray.setDirection(job->directionComponents[0] + job->directionComponents[1] + job->directionComponents[2]);
                 *(job->color) = job->func(job->ray, job->scene, job->depth);
                 m_jobsCompleted++;
-                if (m_jobsCompleted == 1280 * 720) {
+                if (m_jobsCompleted == 1920 * 1080) {
                     m_mainCond->notify_one();
                 }
             }
@@ -103,7 +103,7 @@ class Renderer {
         static std::mutex s_mutex;
         static std::condition_variable s_cond;
 
-        static glm::vec3 s_buffer[1280][720];
+        static glm::vec3 s_buffer[1920][1080];
 
     public:
 

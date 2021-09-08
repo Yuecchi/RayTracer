@@ -35,7 +35,7 @@ void Application::run() {
     scene->addSphere(new Sphere(glm::vec3(20.0f, -5.0f, -50.0f), 5.0f, glm::vec3(1.0f, 1.0f, 0.0f)));
 
     scene->addPlane(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), -10.0f, glm::vec3(0.1, 0.1, 0.1)));
-    scene->addLight(new Light(glm::vec3(0.0f, 50.0f, -75.0f), 1500.0f));
+    scene->addLight(new Light(glm::vec3(0.0f, 50.0f, -75.0f), 5000.0f));
     scene->addLight(new Light(glm::vec3(10.0f, -9.0f, -30.0f), 10.0f));
 
     while (!m_window->closed()) {
@@ -43,7 +43,7 @@ void Application::run() {
         Renderer::clear();
         auto start = std::chrono::system_clock::now();
         Renderer::drawScene(scene);
-        //scene->camera().rotate(3.141f / 15.0f);
+        // scene->camera().rotate(3.141f / 15.0f);
         auto end = std::chrono::system_clock::now();
         auto timeElapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         std::cout << 1.0f / (timeElapsed.count() / 1e+6) << "\n";

@@ -18,8 +18,8 @@ Ray Renderer::s_ray;
 ThreadPool Renderer::s_threadPool;
 std::mutex Renderer::s_mutex;
 std::condition_variable Renderer::s_cond;
-glm::vec3 Renderer::s_buffer[1280][720];
-Job job[1280][720];
+glm::vec3 Renderer::s_buffer[1920][1080];
+Job job[1920][1080];
 
 glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth);
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth);
@@ -30,14 +30,14 @@ void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
             std::cout <<  "Failed to initialize GLEW\n";
             exit(EXIT_FAILURE);
         }
-        std::cout <<  "GLEW Initialized\n";
+        std::cout <<  "GLEW Initialized\n"; 
         s_init = true;
     }
     s_canvas_width = canvas_width;
     s_canvas_height = canvas_height;
-    glOrtho(0.0, (double)canvas_width, (double)canvas_height, 0.0, 0.0, 1.0);
+    glOrtho(0.0, (double)canvas_width, (double)canvas_height, 0.0, 0.0, 1.0); 
 
-    s_threadPool.start(&s_mutex, &s_cond);
+    s_threadPool.start(&s_mutex, &s_cond); 
 }
 
 void Renderer::clear() {
@@ -61,14 +61,14 @@ glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth) {
 
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth) {
     static const float bias = 1e-2;
-    glm::vec3 color = 0.1f * hitObject->color(); // ambient
+    glm::vec3 color = 0.1f * hitObject->color(); // ambient lighting
     glm::vec3 hitPos = ray.origin() + (ray.direction() * hitDistance);
     glm::vec3 surfaceNormal = hitObject->normal(hitPos);
     for (Light *light : scene->sceneLights()) {
         float distanceFromLight = glm::distance(light->position(), hitPos);
         Ray lightRay;
         lightRay.setDirection(light->position() - hitPos);
-        lightRay.setOrigin(hitPos + (bias * surfaceNormal));
+        lightRay.setOrigin(hitPos + (bias * surfaceNormal)); 
         bool obstructed = false;
         for (Primitive *p : scene->sceneObjects()) {
             float obstruction = p->rayIntersect(lightRay);
@@ -78,10 +78,19 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
             }
         }
         if (!obstructed) {
+            // diffuse lighting
             float attenuation = (1.0f / pow(distanceFromLight, 2)) * light->intensity();  
             float incidence = glm::dot(surfaceNormal, hitObject->normal(light->position())); 
             attenuation = attenuation > 1.0f ? 1.0f : attenuation;
             color += hitObject->color() * (attenuation * incidence);
+
+            // specular lighting
+            glm::vec3 specularColor = glm::vec3(1.0f, 1.0f, 1.0f); 
+            glm::vec3 reflectedLight = glm::reflect(-lightRay.direction(), surfaceNormal);
+            glm::vec3 directionToViewer = -ray.direction();
+            float shininess = 128;
+            glm::vec3 specular = specularColor * (float)pow(glm::dot(reflectedLight, directionToViewer), shininess) * attenuation;
+            color += specular;
         }
     }
     // reflection
@@ -89,17 +98,10 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
         Ray reflectRay;
         reflectRay.setDirection(glm::reflect(ray.direction(), surfaceNormal));
         reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
-        color += trace(reflectRay, scene, depth - 1);
+        color += trace(reflectRay, scene, depth - 1) * 0.5f;
     }
 
     return color;
-}
-
-void foo() {
-    int sum = 0;
-    for (int i = 0; i < 10; i += 1) {
-        sum += i;
-    }
 }
 
 void makeJob(Job *job, const Ray &ray, const glm::vec3 &u, const glm::vec3 &v, const glm::vec3 &w, Scene *scene, glm::vec3 *colorPtr) {
