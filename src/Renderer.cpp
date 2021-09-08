@@ -9,6 +9,15 @@
 #include "Primitive.hpp"
 #include "Light.hpp"
 
+#define MULTI
+
+#ifndef SINGLE
+    #define SINGLE
+#endif
+#ifdef MULTI
+    #undef SINGLE
+#endif
+
 bool Renderer::s_init = false;
 
 unsigned int Renderer::s_canvas_width;
@@ -143,17 +152,26 @@ void Renderer::drawScene(Scene *scene) {
     s_ray.setOrigin(scene->camera().position());
     for (int y = 0; y < s_canvas_height; y += 1) {
         verticalOffset = (float)y * down_increment;
-        for (int x = 0; x < s_canvas_width; x += 1) {
+        for (int x = 0; x < s_canvas_width; x += 1) {  
             horizontalOffset = (float)x * right_increment;
+#ifdef SINGLE
+            glm::vec3 direction = canvas_top_left + verticalOffset + horizontalOffset;
+            s_ray.setDirection(direction);
+            s_buffer[x][y] = trace(s_ray, scene, 4);
+#endif
+#ifdef MULTI
             makeJob(&s_jobs[x][y], s_ray, canvas_top_left, verticalOffset, horizontalOffset, scene, &s_buffer[x][y]);
             s_threadPool.submit(&s_jobs[x][y]);
+#endif
         }
     }
 
+#ifdef MULTI
     // wait for thread pool to finish work here
     std::unique_lock<std::mutex> lock(s_mutex);
     s_cond.wait(lock, [](){ return s_threadPool.jobsCompleted() == s_threadPool.jobSize(); });
     s_threadPool.resetJobCount();
+#endif
 
     for (int y = 0; y < s_canvas_height; y += 1) {
         for (int x = 0; x < s_canvas_width; x += 1) {
