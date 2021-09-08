@@ -1,4 +1,4 @@
 # Ray Tracer
 Software Ray Tracer written in C++ using OpenGL
 
-![depth04](https://i.imgur.com/RXQ6KJT.png)
+![depth04](https://i.imgur.com/3CckWdD.png)
