@@ -18,8 +18,8 @@ Ray Renderer::s_ray;
 ThreadPool Renderer::s_threadPool;
 std::mutex Renderer::s_mutex;
 std::condition_variable Renderer::s_cond;
-glm::vec3 Renderer::s_buffer[1920][1080];
-Job job[1920][1080];
+glm::vec3 **Renderer::s_buffer;
+Job **Renderer::s_jobs;
 
 glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth);
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth);
@@ -37,7 +37,14 @@ void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
     s_canvas_height = canvas_height;
     glOrtho(0.0, (double)canvas_width, (double)canvas_height, 0.0, 0.0, 1.0); 
 
-    s_threadPool.start(&s_mutex, &s_cond); 
+    s_buffer = new glm::vec3*[canvas_width];
+    s_jobs = new Job*[canvas_width];
+    for (int i = 0; i < canvas_width; i += 1) {
+        s_buffer[i] = new glm::vec3[canvas_height];
+        s_jobs[i] = new Job[canvas_height];
+    }
+
+    s_threadPool.start(&s_mutex, &s_cond, canvas_width * canvas_height); 
 }
 
 void Renderer::clear() {
@@ -138,14 +145,14 @@ void Renderer::drawScene(Scene *scene) {
         verticalOffset = (float)y * down_increment;
         for (int x = 0; x < s_canvas_width; x += 1) {
             horizontalOffset = (float)x * right_increment;
-            makeJob(&job[x][y], s_ray, canvas_top_left, verticalOffset, horizontalOffset, scene, &s_buffer[x][y]);
-            s_threadPool.submit(&job[x][y]);
+            makeJob(&s_jobs[x][y], s_ray, canvas_top_left, verticalOffset, horizontalOffset, scene, &s_buffer[x][y]);
+            s_threadPool.submit(&s_jobs[x][y]);
         }
     }
 
     // wait for thread pool to finish work here
     std::unique_lock<std::mutex> lock(s_mutex);
-    s_cond.wait(lock, [](){ return s_threadPool.jobsCompleted() == s_canvas_width * s_canvas_height; });
+    s_cond.wait(lock, [](){ return s_threadPool.jobsCompleted() == s_threadPool.jobSize(); });
     s_threadPool.resetJobCount();
 
     for (int y = 0; y < s_canvas_height; y += 1) {

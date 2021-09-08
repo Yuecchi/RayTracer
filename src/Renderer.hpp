@@ -34,7 +34,8 @@ class ThreadPool {
         std::queue<Job*> m_jobs;
         static const unsigned int MAX_THREADS = 2;
 
-        std::atomic<int> m_jobsCompleted; 
+        std::atomic<int> m_jobsCompleted;
+        int m_jobSize; 
 
         void run() {
             Job *job;
@@ -49,7 +50,7 @@ class ThreadPool {
                 job->ray.setDirection(job->directionComponents[0] + job->directionComponents[1] + job->directionComponents[2]);
                 *(job->color) = job->func(job->ray, job->scene, job->depth);
                 m_jobsCompleted++;
-                if (m_jobsCompleted == 1920 * 1080) {
+                if (m_jobsCompleted == m_jobSize) {
                     m_mainCond->notify_one();
                 }
             }
@@ -59,10 +60,11 @@ class ThreadPool {
 
         ThreadPool() = default;
 
-        void start(std::mutex *mutex, std::condition_variable *cond) {
+        void start(std::mutex *mutex, std::condition_variable *cond, int jobSize) {
             m_jobsCompleted = 0;
             m_mainMutex = mutex;
             m_mainCond = cond;
+            m_jobSize = jobSize;
 
             for (int i = 0; i < MAX_THREADS; i  += 1) {
                 m_threads.push_back(std::thread(&ThreadPool::run, this));
@@ -80,6 +82,10 @@ class ThreadPool {
 
         int jobsCompleted() {
             return m_jobsCompleted.load();
+        }
+
+        int jobSize() {
+            return m_jobSize;
         }
 
         void resetJobCount() {
@@ -103,7 +109,8 @@ class Renderer {
         static std::mutex s_mutex;
         static std::condition_variable s_cond;
 
-        static glm::vec3 s_buffer[1920][1080];
+        static glm::vec3 **s_buffer;
+        static Job **s_jobs;
 
     public:
 
