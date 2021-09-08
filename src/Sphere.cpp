@@ -1,8 +1,7 @@
 #include <cmath>
 
-#include <glm/geometric.hpp>
-
 #include "Sphere.hpp"
+#include "Math.hpp"
 
 Sphere::Sphere(glm::vec3 position, float radius, glm::vec3 color) {
     m_position = position;
@@ -26,7 +25,7 @@ float Sphere::rayIntersect(Ray ray) {
 }
 
 glm::vec3 Sphere::normal(const glm::vec3 &v) {
-	return glm::normalize(v - m_position);
+	return normalize(v - m_position);
 }
 
 glm::vec3 &Sphere::color() {

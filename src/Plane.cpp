@@ -1,12 +1,10 @@
 #include <cmath>
 
-#include <glm/geometric.hpp>
-
 #include "Plane.hpp"
+#include "Math.hpp"
 
 Plane::Plane(glm::vec3 normal, float distance, glm::vec3 color) {
-	m_normal = normal;
-    glm::normalize(m_normal);
+	m_normal = normalize(normal);
     m_distance = distance;
     m_origin = m_normal * m_distance;
 	m_color = color;
