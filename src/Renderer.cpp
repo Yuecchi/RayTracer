@@ -115,7 +115,7 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
         Ray reflectRay;
         reflectRay.setDirection(glm::reflect(ray.direction(), surfaceNormal));
         reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
-        color += trace(reflectRay, scene, depth - 1) * 0.5f;
+        color += trace(reflectRay, scene, depth - 1) * 0.6f;
     }
 
     return color;
@@ -168,8 +168,7 @@ void Renderer::drawScene(Scene *scene) {
     }
 
 #ifdef MULTI 
-    // wait for thread pool to finish computing all the colors
-    // for each pixel  
+    // wait for thread pool to finish computing all the colors for each pixel
     std::unique_lock<std::mutex> lock(s_mutex);  
     s_cond.wait(lock, [](){ return s_threadPool.jobsCompleted() == s_threadPool.jobSize(); });   
     s_threadPool.resetJobCount();  

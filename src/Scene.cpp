@@ -15,6 +15,10 @@ void Scene::addPlane(Plane *plane) {
     m_sceneObjects.push_back(plane);   
 }
 
+void Scene::addTriangle(Triangle *triangle) {
+    m_sceneObjects.push_back(triangle);
+}
+
 void Scene::addLight(Light *light) {
     m_sceneLights.push_back(light);    
 }

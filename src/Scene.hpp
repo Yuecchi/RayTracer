@@ -7,6 +7,7 @@
 #include "Sphere.hpp"
 #include "Plane.hpp"
 #include "Light.hpp"
+#include "Triangle.hpp"
 
 class Scene {
 
@@ -23,6 +24,8 @@ class Scene {
         void addSphere(Sphere *sphere);
 
         void addPlane(Plane *plane);
+
+        void addTriangle(Triangle *triangle);
 
         void addLight(Light *light);
 
