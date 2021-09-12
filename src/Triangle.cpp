@@ -66,4 +66,16 @@ glm::vec3 &Triangle::color() {
     return m_color;
 } 
 
+glm::vec3 &Triangle::p1() {
+    return m_p1;
+}
+
+glm::vec3 &Triangle::p2() {
+    return m_p2;
+}
+
+glm::vec3 &Triangle::p3() {
+    return m_p3;
+}
+
 Triangle::~Triangle() = default;

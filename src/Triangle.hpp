@@ -20,5 +20,11 @@ class Triangle : public Primitive {
 
         glm::vec3 &color();
 
+        glm::vec3 &p1();
+
+        glm::vec3 &p2();
+
+        glm::vec3 &p3();
+
         ~Triangle();
 };

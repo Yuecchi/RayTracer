@@ -5,12 +5,16 @@
 
 #include "SceneObject.hpp"
 #include "Triangle.hpp"
+#include "BoundingBox.hpp"
 
 class Mesh : public SceneObject {
 
     private:
 
         std::vector<Triangle*> m_polys; 
+        BoundingBox m_boundingBox;
+
+        void computeBoundingBox();
 
     public:
 

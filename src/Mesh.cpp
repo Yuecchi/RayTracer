@@ -2,12 +2,37 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
+#include <iostream>
 
 #include <glm/vec3.hpp>
 
 #include "Mesh.hpp"
 
 const int BUFFER_SIZE = 128;
+
+void Mesh::computeBoundingBox() {
+    glm::vec3 min = glm::vec3(INFINITY);
+    glm::vec3 max = glm::vec3(-INFINITY);
+    for (Triangle *t : m_polys) {
+        // find the minimum x, y and z values in the mesh
+        float minx = std::min(t->p1().x, std::min(t->p2().x, t->p3().x));
+        float miny = std::min(t->p1().y, std::min(t->p2().y, t->p3().y));
+        float minz = std::min(t->p1().z, std::min(t->p2().z, t->p3().z));
+        min.x = min.x > minx ? minx : min.x;
+        min.y = min.y > miny ? miny : min.y;
+        min.z = min.z > minz ? minz : min.z;
+
+        // find the maximum x, y and z values in the mesh
+        float maxx = std::max(t->p1().x, std::max(t->p2().x, t->p3().x));
+        float maxy = std::max(t->p1().y, std::max(t->p2().y, t->p3().y));
+        float maxz = std::max(t->p1().z, std::max(t->p2().z, t->p3().z));
+        max.x = max.x < maxx ? maxx : max.x;
+        max.y = max.y < maxy ? maxy : max.y;
+        max.z = max.z < maxz ? maxz : max.z;
+    }
+    m_boundingBox.setBoundaries(min, max);
+}
 
 Mesh::Mesh(const std::string &filepath) {   
     std::ifstream meshFile(filepath);
@@ -35,23 +60,25 @@ Mesh::Mesh(const std::string &filepath) {
             }
         }
     }
+    computeBoundingBox();
 }
 
-RayIntersectData Mesh::rayIntersect(Ray ray) {
+RayIntersectData Mesh::rayIntersect(Ray ray) {   
     RayIntersectData result = {
         nullptr,
         INFINITY
     };
 
-    RayIntersectData intermediate;
-    for (Triangle *t : m_polys) {
-        intermediate = t->rayIntersect(ray);
-        if (result.distance > intermediate.distance) {
-            result.distance = intermediate.distance;
-            result.sceneObject = intermediate.sceneObject;
+    if (m_boundingBox.rayIntersect(ray)) {  
+        RayIntersectData intermediate;
+        for (Triangle *t : m_polys) {
+            intermediate = t->rayIntersect(ray);
+            if (result.distance > intermediate.distance) {
+                result.distance = intermediate.distance;
+                result.sceneObject = intermediate.sceneObject;
+            }
         }
     }
-
     return result;
 }
 

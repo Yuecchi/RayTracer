@@ -73,6 +73,7 @@
         "sstream": "cpp",
         "stop_token": "cpp",
         "xtree": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "cassert": "cpp"
     }
 }

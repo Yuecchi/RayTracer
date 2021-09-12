@@ -1,8 +1,5 @@
 #include "Scene.hpp"
 
-#include "Sphere.hpp"
-#include "Plane.hpp"
-
 Scene *Scene::createScene() {
     return new Scene;
 }
@@ -26,7 +23,6 @@ void Scene::addMesh(Mesh *mesh) {
 void Scene::addLight(Light *light) {
     m_sceneLights.push_back(light);    
 }
-
 
 Camera &Scene::camera() {
     return m_camera;

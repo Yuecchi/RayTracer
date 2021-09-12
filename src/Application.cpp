@@ -50,12 +50,14 @@ void Application::run() {
     */
 
     scene->addLight(new Light(glm::vec3(0.0f, 1000.0f, 0.0f), 1000000.0f));
-    scene->addLight(new Light(glm::vec3(0.0f, 9.0f, 6.8f), 500.0f));
+    //scene->addLight(new Light(glm::vec3(0.0f, 9.0f, 6.8f), 500.0f));
 
+    /*
     scene->addSphere(new Sphere(glm::vec3(0.0f, 3.0f, 15.0f), 3.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
     scene->addSphere(new Sphere(glm::vec3(-20.0f, 10.0f, -15.0f), 10.0f, glm::vec3(0.0f, 0.0f, 1.0f))); 
     scene->addSphere(new Sphere(glm::vec3(20.0f, 5.0f, 0.0f), 5.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
     scene->addSphere(new Sphere(glm::vec3(0.0f, 20.0f, 40.0f), 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)));
+    */
 
     scene->addPlane(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, glm::vec3(0.1, 0.1, 0.1)));
     Mesh mesh("assets/mesh20.obj");
