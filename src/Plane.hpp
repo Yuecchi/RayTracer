@@ -1,7 +1,5 @@
 #pragma once
 
-#include "glm/vec3.hpp"
-
 #include "Primitive.hpp"
 
 class Plane : public Primitive {
@@ -16,7 +14,7 @@ class Plane : public Primitive {
 
         Plane(glm::vec3 normal, float distance, glm::vec3 color);
 
-        float rayIntersect(Ray ray);
+        RayIntersectData rayIntersect(Ray ray);
 
         glm::vec3 normal(const glm::vec3 &v);
 

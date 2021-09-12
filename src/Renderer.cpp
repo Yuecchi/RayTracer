@@ -54,7 +54,7 @@ void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
         s_jobs[i] = new Job[s_canvas_height];
     }
 
-    s_threadPool.start(&s_mutex, &s_cond, s_canvas_width * s_canvas_height); 
+    s_threadPool.start(&s_mutex, &s_cond, s_canvas_width * s_canvas_height);  
 }
 
 void Renderer::clear() {
@@ -62,14 +62,15 @@ void Renderer::clear() {
 }
 
 glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth) {
+    RayIntersectData result;
     glm::vec3 color = glm::vec3(0.0f, 0.0f, 0.0f); // background color
     float hitDistance = INFINITY;
     Primitive *hitObject = nullptr;
-    for (Primitive *p : scene->sceneObjects()) {
-        float distance = p->rayIntersect(ray);
-        if (distance < hitDistance) {
-            hitDistance = distance;
-            hitObject = p;
+    for (SceneObject *p : scene->sceneObjects()) {
+        result = p->rayIntersect(ray);
+        if (result.distance < hitDistance) {
+            hitDistance = result.distance;
+            hitObject = (Primitive*)result.sceneObject;
         }
     }
     if (hitDistance == INFINITY) return color; // no object found by ray
@@ -77,6 +78,7 @@ glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth) {
 }
 
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth) {
+    RayIntersectData result;
     static const float bias = 1e-2;
     glm::vec3 color = 0.1f * hitObject->color(); // ambient lighting
     glm::vec3 hitPos = ray.origin() + (ray.direction() * hitDistance);
@@ -87,9 +89,9 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
         lightRay.setDirection(light->position() - hitPos);
         lightRay.setOrigin(hitPos + (bias * surfaceNormal)); 
         bool obstructed = false;
-        for (Primitive *p : scene->sceneObjects()) {
-            float obstruction = p->rayIntersect(lightRay);
-            if (obstruction != INFINITY && (distanceFromLight - obstruction) > bias) {
+        for (SceneObject *p : scene->sceneObjects()) {
+            result = p->rayIntersect(lightRay);
+            if (result.distance != INFINITY && (distanceFromLight - result.distance) > bias) {
                 obstructed = true;
                 break;
             }
@@ -178,7 +180,6 @@ void Renderer::drawScene(Scene *scene) {
     for (int y = 0; y < s_canvas_height; y += scale) {       
         for (int x = 0; x < s_canvas_width; x += scale) {   
             put_pixel(x, y, s_buffer[x][y]);  
-            
             /*
             int count = 0;
             glm::vec3 color = glm::vec3(0.0f); 
@@ -189,10 +190,11 @@ void Renderer::drawScene(Scene *scene) {
                 }
             }
             put_pixel(x / scale, y / scale, color / (float)count);
-            */  
+            */
         }
     }
-    glEnd();  
+    glEnd();
+  
 }
 
 void Renderer::put_pixel(float x, float y, const glm::vec3 &color) {  

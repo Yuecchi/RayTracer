@@ -22,7 +22,10 @@ Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color) {
  * https://en.wikipedia.org/wiki/Möller–Trumbore_intersection_algorithm
  */ 
 
-float Triangle::rayIntersect(Ray ray) {
+RayIntersectData Triangle::rayIntersect(Ray ray) {
+	RayIntersectData result = {
+		nullptr, INFINITY
+	};
     static const float bias = 1e-7;
     glm::vec3 e1 = m_p2 - m_p1;
     glm::vec3 e2 = m_p3 - m_p1;
@@ -30,25 +33,29 @@ float Triangle::rayIntersect(Ray ray) {
     glm::vec3 h  = glm::cross(ray.direction(), e2);
     float a = glm::dot(e1, h);
     if (a > -bias && a < bias) {
-        return INFINITY; // the ray is parallel to the triangle
+        return result; // the ray is parallel to the triangle
     }
 
     float f = 1.0f / a;
     glm::vec3 s = ray.origin() - m_p1;
     float u = f * glm::dot(s, h);
     if (u < 0.0f || u > 1.0f) {
-        return INFINITY;
+        return result;
     }
 
     glm::vec3 q = glm::cross(s, e1);
     float v = f * glm::dot(ray.direction(), q);
     if (v < 0.0f || (u + v) > 1.0f) {
-        return INFINITY;
+        return result;
     }
 
     float t = f * glm::dot(e2, q);
-    if (t > bias) return t;
-    else return INFINITY;
+    if (t > bias) {
+        result.distance = t;
+        result.sceneObject = this;
+        return result;
+    }
+    else return result;
 }
 
 glm::vec3 Triangle::normal(const glm::vec3 &v) {

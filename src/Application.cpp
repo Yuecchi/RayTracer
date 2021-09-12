@@ -10,7 +10,7 @@
 
 
 Application::Application(const char* name, unsigned int window_width, unsigned int window_height) : m_name(name) {
-    m_window = new Window(name, window_width, window_height);
+    m_window = new Window(m_name, window_width, window_height);
     Renderer::init(window_width, window_height);
     run();
 }
@@ -59,10 +59,7 @@ void Application::run() {
 
     scene->addPlane(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, glm::vec3(0.1, 0.1, 0.1)));
     Mesh mesh("assets/mesh20.obj");
-    int count = 0;
-    for (Triangle* t : mesh.polys()) {
-        scene->addTriangle(t);
-    }
+    scene->addMesh(&mesh);
     
     scene->camera().setPosition(glm::vec3(30.0f, 10.0f, 30.0f));
     scene->camera().rotate(3.141f / -4.0f);

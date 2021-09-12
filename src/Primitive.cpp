@@ -1,5 +1,5 @@
-#include "Primitive.hpp"
+#include "Primitive.hpp" 
 
 Primitive::Primitive() = default;
 
-Primitive::~Primitive() = default;
+Primitive::~Primitive() = default;  

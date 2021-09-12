@@ -3,9 +3,10 @@
 #include <vector>
 #include <string>
 
+#include "SceneObject.hpp"
 #include "Triangle.hpp"
 
-class Mesh {
+class Mesh : public SceneObject {
 
     private:
 
@@ -14,6 +15,8 @@ class Mesh {
     public:
 
         Mesh(const std::string &filepath);
+
+        RayIntersectData rayIntersect(Ray ray);
 
         std::vector<Triangle*> polys();
 

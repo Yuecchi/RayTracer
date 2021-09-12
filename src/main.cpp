@@ -1,11 +1,8 @@
 #include "Application.hpp"
 
-#include <thread>
-#include <iostream>
-
 int main() {
 
-    Application raytracer("Raytracer", 1920, 1080);
+    Application raytracer("Raytracer", 960, 540);
     
     return 0;
 }

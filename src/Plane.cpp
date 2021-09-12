@@ -10,18 +10,23 @@ Plane::Plane(glm::vec3 normal, float distance, glm::vec3 color) {
 	m_color = color;
 }
 
-float Plane::rayIntersect(Ray ray) {
+RayIntersectData Plane::rayIntersect(Ray ray) {
+	RayIntersectData result = {
+		nullptr, INFINITY
+	};
 	float denom = glm::dot(ray.direction(), m_normal);
 	if (fabs(denom) > 1e-6) {
 		glm::vec3 w = m_origin - ray.origin();
 		float numer = glm::dot(w, m_normal);
 		float t = numer / denom;
 		if (t >= 1e-6) {
-			return t;
+			result.distance = t;
+			result.sceneObject = this;
+			return result;
 		}
-		else return INFINITY;
+		else return result;
 	}
-	return INFINITY;
+	return result;
 }
 
 glm::vec3 Plane::normal(const glm::vec3 &v) {

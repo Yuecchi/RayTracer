@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Ray.hpp"
+#include "SceneObject.hpp"
 
-class Primitive {
-
-    private:
+class Primitive : public SceneObject {
 
     protected: 
 
@@ -14,7 +12,7 @@ class Primitive {
 
         Primitive();
 
-        virtual float rayIntersect(Ray ray) = 0;
+        virtual RayIntersectData rayIntersect(Ray ray) = 0; 
 
         virtual glm::vec3 normal(const glm::vec3 &v) = 0;
 
@@ -23,3 +21,4 @@ class Primitive {
         virtual ~Primitive();
 
 };
+

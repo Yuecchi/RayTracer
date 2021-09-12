@@ -19,6 +19,10 @@ void Scene::addTriangle(Triangle *triangle) {
     m_sceneObjects.push_back(triangle);
 }
 
+void Scene::addMesh(Mesh *mesh) {
+    m_sceneObjects.push_back(mesh);
+}
+
 void Scene::addLight(Light *light) {
     m_sceneLights.push_back(light);    
 }
@@ -28,7 +32,7 @@ Camera &Scene::camera() {
     return m_camera;
 }
 
-std::vector<Primitive*> &Scene::sceneObjects() {
+std::vector<SceneObject*> &Scene::sceneObjects() {
     return m_sceneObjects;
 }
 
@@ -39,7 +43,7 @@ std::vector<Light*> &Scene::sceneLights() {
 void Scene::deleteScene() {
     // delete all scene objects and lights 
     // before deleting  the scene itself
-    for (Primitive *p : m_sceneObjects) {
+    for (SceneObject *p : m_sceneObjects) {
         delete p;
     }
     for (Light *light : m_sceneLights) {

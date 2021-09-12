@@ -14,7 +14,7 @@ class Triangle : public Primitive {
         
         Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
 
-        float rayIntersect(Ray ray);
+        RayIntersectData rayIntersect(Ray ray);
 
         glm::vec3 normal(const glm::vec3 &v);
 

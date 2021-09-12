@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 #include <glm/vec3.hpp>
 
@@ -36,10 +37,30 @@ Mesh::Mesh(const std::string &filepath) {
     }
 }
 
+RayIntersectData Mesh::rayIntersect(Ray ray) {
+    RayIntersectData result = {
+        nullptr,
+        INFINITY
+    };
+
+    RayIntersectData intermediate;
+    for (Triangle *t : m_polys) {
+        intermediate = t->rayIntersect(ray);
+        if (result.distance > intermediate.distance) {
+            result.distance = intermediate.distance;
+            result.sceneObject = intermediate.sceneObject;
+        }
+    }
+
+    return result;
+}
+
 std::vector<Triangle*> Mesh::polys() {
     return m_polys;
 }
 
-
-// todo: delete triangles in vector
-Mesh::~Mesh() = default;
+Mesh::~Mesh() {
+    for (Triangle *t : m_polys) {
+        delete t;
+    }
+}
