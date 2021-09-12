@@ -5,7 +5,6 @@
 class Triangle : public Primitive {
     private:
 
-
         glm::vec3 m_p1, m_p2, m_p3;
         glm::vec3 m_normal;
 

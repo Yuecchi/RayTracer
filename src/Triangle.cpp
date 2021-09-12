@@ -6,7 +6,7 @@
 void Triangle::computeNormal() {
     glm::vec3 u = m_p2 - m_p1;
     glm::vec3 v = m_p3 - m_p1;
-    m_normal = normalize(glm::cross(u, v));
+    m_normal = normalize(glm::cross(v, u));
 }
 
 Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color) {

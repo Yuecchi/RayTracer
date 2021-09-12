@@ -72,6 +72,7 @@
         "optional": "cpp",
         "sstream": "cpp",
         "stop_token": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "fstream": "cpp"
     }
 }
