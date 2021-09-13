@@ -3,10 +3,10 @@
 #include "Sphere.hpp"
 #include "Math.hpp"
 
-Sphere::Sphere(glm::vec3 position, float radius, glm::vec3 color) {
+Sphere::Sphere(glm::vec3 position, float radius, Material material) {
     m_position = position;
     m_radius = radius;
-	m_color = color;
+	m_material = material;
 }
 
 RayIntersectData Sphere::rayIntersect(Ray ray) {
@@ -33,10 +33,6 @@ RayIntersectData Sphere::rayIntersect(Ray ray) {
 
 glm::vec3 Sphere::normal(const glm::vec3 &v) {
 	return normalize(v - m_position);
-}
-
-glm::vec3 &Sphere::color() {
-	return m_color;
 }
 
 Sphere::~Sphere() = default;

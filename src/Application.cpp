@@ -21,50 +21,52 @@ void Application::run() {
     
     Scene *scene = Scene::createScene(); 
 
-    /*
-    for (int i = 0; i < 100; i += 1) {
-        scene->addSphere(new Sphere(glm::vec3(-100 + (rand() % 200), -5 + (rand() % 100), -100 + (rand() % 200)), 5.0f, glm::vec3(rand() % 2, rand() % 2, rand() % 2)));
-    }
-    scene->addLight(new Light(glm::vec3(20.0f, 0.0f, 0.0f), 1000.0f));
-    scene->addPlane(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), -10.0f, glm::vec3(0.1f, 0.1f, 0.1f)));
-    */
+    Material phongRed    = { glm::vec3(1.0f, 0.0f, 0.0f), 0.1f, 0.9f, 0.9f, 0.5f, 128 };
+    Material phongBlue   = { glm::vec3(0.0f, 0.0f, 1.0f), 0.1f, 0.9f, 0.9f, 0.5f, 128 };
+    Material phongGreen  = { glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 0.9f, 0.9f, 0.5f, 128 };
+    Material phongPurple = { glm::vec3(1.0f, 0.0f, 1.0f), 0.1f, 0.9f, 0.9f, 0.5f, 128 };
+    Material phongCyan   = { glm::vec3(0.0f, 1.0f, 1.0f), 0.1f, 0.9f, 0.9f, 0.5f, 128 };
+    Material phongYellow = { glm::vec3(1.0f, 1.0f, 0.0f), 0.1f, 0.9f, 0.9f, 0.5f, 128 };
 
-    /*
-    scene->addSphere(new Sphere(glm::vec3(0.0f, -5.0f, -50.0f), 5.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-    scene->addSphere(new Sphere(glm::vec3(-25.0f, -5.0f, -55.0f), 5.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
-    scene->addSphere(new Sphere(glm::vec3(-18.0f, -5.0f, -80.0f), 5.0f, glm::vec3(0.0f, 1.0f, 0.0f))); 
-    scene->addSphere(new Sphere(glm::vec3(20.0f, -5.0f, -20.0f), 5.0f, glm::vec3(1.0f, 0.0f, 1.0f)));
-    scene->addSphere(new Sphere(glm::vec3(-25.0f, -5.0f, -30.0f), 5.0f, glm::vec3(0.0f, 1.0f, 1.0f)));  
-    scene->addSphere(new Sphere(glm::vec3(20.0f, -5.0f, -50.0f), 5.0f, glm::vec3(1.0f, 1.0f, 0.0f)));
+    Material blackMirror = { glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 0.9f, 0.9f, 0.9f, 128 };
+    Material greyMirror = { glm::vec3(0.1f, 0.1f, 0.1f), 0.1f, 0.9f, 0.9f, 0.9f, 128 };
+ 
+    scene->addObject(new Sphere(glm::vec3(0.0f, -5.0f, -50.0f),   5.0f, phongRed));
+    scene->addObject(new Sphere(glm::vec3(-25.0f, -5.0f, -55.0f), 5.0f, phongGreen));
+    scene->addObject(new Sphere(glm::vec3(-18.0f, -5.0f, -80.0f), 5.0f, phongBlue)); 
+    scene->addObject(new Sphere(glm::vec3(20.0f, -5.0f, -20.0f),  5.0f, phongPurple));
+    scene->addObject(new Sphere(glm::vec3(-25.0f, -5.0f, -30.0f), 5.0f, phongCyan));  
+    scene->addObject(new Sphere(glm::vec3(20.0f, -5.0f, -50.0f),  5.0f, phongYellow));
 
-    scene->addTriangle(new Triangle(
+    scene->addObject(new Triangle(
         glm::vec3(-35.0f, 0.0f, -100.0f),
         glm::vec3(0.0f, 50.0f, -80.0f),
         glm::vec3(35.0f, 0.0f, -100.0f),
-        glm::vec3(0.0)
+        blackMirror
         ));  
 
-    scene->addPlane(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), -10.0f, glm::vec3(0.1, 0.1, 0.1)));
+    scene->addObject(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), -10.0f, greyMirror));
     scene->addLight(new Light(glm::vec3(0.0f, 50.0f, -75.0f), 5000.0f));
     scene->addLight(new Light(glm::vec3(10.0f, -9.0f, -30.0f), 10.0f));
-    */
-
-    scene->addLight(new Light(glm::vec3(0.0f, 1000.0f, 0.0f), 1000000.0f));
-    //scene->addLight(new Light(glm::vec3(0.0f, 9.0f, 6.8f), 500.0f));
-
-    /*
-    scene->addSphere(new Sphere(glm::vec3(0.0f, 3.0f, 15.0f), 3.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-    scene->addSphere(new Sphere(glm::vec3(-20.0f, 10.0f, -15.0f), 10.0f, glm::vec3(0.0f, 0.0f, 1.0f))); 
-    scene->addSphere(new Sphere(glm::vec3(20.0f, 5.0f, 0.0f), 5.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
-    scene->addSphere(new Sphere(glm::vec3(0.0f, 20.0f, 40.0f), 20.0f, glm::vec3(1.0f, 0.0f, 1.0f)));
-    */
-
-    scene->addPlane(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, glm::vec3(0.1, 0.1, 0.1)));
-    Mesh mesh("assets/mesh20.obj");
-    scene->addMesh(&mesh);
     
-    scene->camera().setPosition(glm::vec3(30.0f, 10.0f, 30.0f));
-    scene->camera().rotate(3.141f / -4.0f);
+    /*
+    scene->addLight(new Light(glm::vec3(0.0f, 1000.0f, 0.0f), 1000000.0f));
+    scene->addLight(new Light(glm::vec3(0.0f, 9.0f, 6.8f), 500.0f));
+
+
+    scene->addObject(new Sphere(glm::vec3(0.0f, 3.0f, 15.0f), 3.0f, phongRed));
+    scene->addObject(new Sphere(glm::vec3(-20.0f, 10.0f, -15.0f), 10.0f, phongBlue)); 
+    scene->addObject(new Sphere(glm::vec3(20.0f, 5.0f, 0.0f), 5.0f, phongGreen));
+    scene->addObject(new Sphere(glm::vec3(0.0f, 20.0f, 40.0f), 20.0f, phongPurple));
+
+
+    scene->addObject(new Plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, greyMirror));
+    Mesh mesh("assets/mesh20.obj");
+    scene->addObject(&mesh);
+    */
+    
+    //scene->camera().setPosition(glm::vec3(30.0f, 10.0f, 30.0f));
+    //scene->camera().rotate(3.141f / -4.0f);
 
     while (!m_window->closed()) { 
         m_window->poll();

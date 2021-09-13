@@ -4,20 +4,8 @@ Scene *Scene::createScene() {
     return new Scene;
 }
 
-void Scene::addSphere(Sphere *sphere) {
-    m_sceneObjects.push_back(sphere);
-}
-
-void Scene::addPlane(Plane *plane) {
-    m_sceneObjects.push_back(plane);   
-}
-
-void Scene::addTriangle(Triangle *triangle) {
-    m_sceneObjects.push_back(triangle);
-}
-
-void Scene::addMesh(Mesh *mesh) {
-    m_sceneObjects.push_back(mesh);
+void Scene::addObject(SceneObject *object) {
+    m_sceneObjects.push_back(object);
 }
 
 void Scene::addLight(Light *light) {

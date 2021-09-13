@@ -23,13 +23,7 @@ class Scene {
 
         static Scene *createScene();
 
-        void addSphere(Sphere *sphere);
-
-        void addPlane(Plane *plane);
-
-        void addTriangle(Triangle *triangle);
-
-        void addMesh(Mesh *mesh);
+        void addObject(SceneObject *object);
 
         void addLight(Light *light);
 

@@ -12,13 +12,11 @@ class Plane : public Primitive {
 
     public:
 
-        Plane(glm::vec3 normal, float distance, glm::vec3 color);
+        Plane(glm::vec3 normal, float distance, Material material);
 
         RayIntersectData rayIntersect(Ray ray);
 
         glm::vec3 normal(const glm::vec3 &v);
-
-        glm::vec3 &color();
 
         ~Plane();
 

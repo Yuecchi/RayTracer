@@ -3,11 +3,11 @@
 #include "Plane.hpp"
 #include "Math.hpp"
 
-Plane::Plane(glm::vec3 normal, float distance, glm::vec3 color) {
+Plane::Plane(glm::vec3 normal, float distance, Material material) {
 	m_normal = normalize(normal);
     m_distance = distance;
     m_origin = m_normal * m_distance;
-	m_color = color;
+	m_material = material;
 }
 
 RayIntersectData Plane::rayIntersect(Ray ray) {
@@ -31,10 +31,6 @@ RayIntersectData Plane::rayIntersect(Ray ray) {
 
 glm::vec3 Plane::normal(const glm::vec3 &v) {
 	return m_normal;
-}
-
-glm::vec3 &Plane::color() {
-	return m_color;
 }
 
 Plane::~Plane() = default;

@@ -35,6 +35,8 @@ void Mesh::computeBoundingBox() {
 }
 
 Mesh::Mesh(const std::string &filepath) {   
+    Material material = { glm::vec3(0.5f, 0.5f, 0.5f), 0.1f, 0.9f, 0.9f, 1.0f, 128 };
+    
     std::ifstream meshFile(filepath);
     std::vector<glm::vec3> vertices;
     char buffer[BUFFER_SIZE];
@@ -56,7 +58,7 @@ Mesh::Mesh(const std::string &filepath) {
                 vertices.push_back(vertex);
             } else if (buffer[0] == 'f') {
                 ss >> junk >> index[0] >> index[1] >> index[2];
-                m_polys.push_back(new Triangle(vertices[index[0] - 1], vertices[index[1] - 1], vertices[index[2] - 1], glm::vec3(0.5f)));
+                m_polys.push_back(new Triangle(vertices[index[0] - 1], vertices[index[1] - 1], vertices[index[2] - 1], material));
             }
         }
     }

@@ -12,13 +12,11 @@ class Sphere : public Primitive {
 
     public:
 
-        Sphere(glm::vec3 position, float radius, glm::vec3 color);
+        Sphere(glm::vec3 position, float radius, Material material);
 
         RayIntersectData rayIntersect(Ray ray);
 
         glm::vec3 normal(const glm::vec3 &v);
-
-        glm::vec3 &color();
 
         ~Sphere();
 

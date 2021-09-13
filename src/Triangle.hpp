@@ -12,13 +12,11 @@ class Triangle : public Primitive {
 
     public:
         
-        Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
+        Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Material material);
 
         RayIntersectData rayIntersect(Ray ray);
 
         glm::vec3 normal(const glm::vec3 &v);
-
-        glm::vec3 &color();
 
         glm::vec3 &p1();
 

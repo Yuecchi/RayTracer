@@ -80,7 +80,7 @@ glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth) {
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth) {
     RayIntersectData result;
     static const float bias = 1e-2;
-    glm::vec3 color = 0.1f * hitObject->color(); // ambient lighting
+    glm::vec3 color = hitObject->ambience() * hitObject->color();
     glm::vec3 hitPos = ray.origin() + (ray.direction() * hitDistance);
     glm::vec3 surfaceNormal = hitObject->normal(hitPos);
     for (Light *light : scene->sceneLights()) {
@@ -97,27 +97,28 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
             }
         }
         if (!obstructed) {
+            float attenuation = (1.0f / pow(distanceFromLight, 2));
+            float illumination = attenuation * light->intensity();
+            
             // diffuse lighting
-            float attenuation = (1.0f / pow(distanceFromLight, 2)) * light->intensity();  
             float incidence = glm::dot(surfaceNormal, hitObject->normal(light->position())); 
-            attenuation = attenuation > 1.0f ? 1.0f : attenuation;
-            color += hitObject->color() * (attenuation * incidence);
+            color += (hitObject->diffuse() * hitObject->color() * incidence * illumination);
 
             // specular lighting
-            glm::vec3 specularColor = glm::vec3(1.0f, 1.0f, 1.0f); 
+            glm::vec3 specularColor = glm::vec3(1.0f, 1.0f, 1.0f); // color of the light
             glm::vec3 reflectedLight = glm::reflect(-lightRay.direction(), surfaceNormal);
             glm::vec3 directionToViewer = -ray.direction();
             float shininess = 128;
-            glm::vec3 specular = specularColor * (float)pow(glm::dot(reflectedLight, directionToViewer), shininess) * attenuation;
-            color += specular;
+            color += (hitObject->specular() * specularColor * (float)pow(glm::dot(reflectedLight, directionToViewer), hitObject->shininess()) * illumination);
         }
+        
     }
     // reflection
-    if (depth > 0) {
+    if (depth > 0 && hitObject->reflectivity() > 0.0f) {
         Ray reflectRay;
         reflectRay.setDirection(glm::reflect(ray.direction(), surfaceNormal));
         reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
-        color += trace(reflectRay, scene, depth - 1) * 0.6f;
+        color += (hitObject->reflectivity() * trace(reflectRay, scene, depth - 1));
     }
 
     return color;
@@ -130,7 +131,7 @@ void makeJob(Job *job, const Ray &ray, const glm::vec3 &u, const glm::vec3 &v, c
     job->directionComponents[1] = v;
     job->directionComponents[2] = w;
     job->scene  = scene;
-    job->depth  = 4;
+    job->depth  = 8;
     job->color  = colorPtr;
 }
 
@@ -179,8 +180,7 @@ void Renderer::drawScene(Scene *scene) {
     glBegin(GL_POINTS);
     for (int y = 0; y < s_canvas_height; y += scale) {       
         for (int x = 0; x < s_canvas_width; x += scale) {   
-            put_pixel(x, y, s_buffer[x][y]);  
-            /*
+            //put_pixel(x, y, s_buffer[x][y]);  
             int count = 0;
             glm::vec3 color = glm::vec3(0.0f); 
             for (int i = 0; i < scale; i += 1) {
@@ -190,7 +190,6 @@ void Renderer::drawScene(Scene *scene) {
                 }
             }
             put_pixel(x / scale, y / scale, color / (float)count);
-            */
         }
     }
     glEnd();

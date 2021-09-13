@@ -9,11 +9,11 @@ void Triangle::computeNormal() {
     m_normal = normalize(glm::cross(v, u));
 }
 
-Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color) {
+Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Material material) {
     m_p1 = p1;
     m_p2 = p2;
     m_p3 = p3;
-    m_color = color;
+    m_material = material;
     computeNormal();
 }
 
@@ -61,10 +61,6 @@ RayIntersectData Triangle::rayIntersect(Ray ray) {
 glm::vec3 Triangle::normal(const glm::vec3 &v) {
     return m_normal;
 }
-
-glm::vec3 &Triangle::color() {
-    return m_color;
-} 
 
 glm::vec3 &Triangle::p1() {
     return m_p1;
