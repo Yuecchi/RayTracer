@@ -1,9 +1,10 @@
 #pragma once
 
 #include "SceneObject.hpp"
+#include "Texture.hpp"
 
 struct Material {
-    glm::vec3 color;
+    Texture *texture;
     float ambienceCoeff;
     float diffuseCoeff;
     float specularCoeff;
@@ -25,7 +26,7 @@ class Primitive : public SceneObject {
 
         virtual glm::vec3 normal(const glm::vec3 &v) = 0;
 
-        glm::vec3 &color();
+        virtual void color(glm::vec3 &hitpos, glm::vec3 *result);
 
         float ambience();
 

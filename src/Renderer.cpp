@@ -32,7 +32,7 @@ Job **Renderer::s_jobs;
 
 glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth);
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth);
-int scale = 1;
+int scale = 2;
 
 void Renderer::init(unsigned int canvas_width, unsigned int canvas_height) {
     if (!s_init) {
@@ -80,14 +80,16 @@ glm::vec3 trace(Ray &ray, Scene *scene, unsigned int depth) {
 glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance, unsigned int depth) {
     RayIntersectData result;
     static const float bias = 1e-2;
-    glm::vec3 color = hitObject->ambience() * hitObject->color();
-    glm::vec3 hitPos = ray.origin() + (ray.direction() * hitDistance);
-    glm::vec3 surfaceNormal = hitObject->normal(hitPos);
+    glm::vec3 hitpos = ray.origin() + (ray.direction() * hitDistance);
+    glm::vec3 surfaceNormal = hitObject->normal(hitpos);
+    glm::vec3 objectColor;
+    hitObject->color(hitpos, &objectColor);
+    glm::vec3 color = hitObject->ambience() * objectColor;
     for (Light *light : scene->sceneLights()) {
-        float distanceFromLight = glm::distance(light->position(), hitPos);
+        float distanceFromLight = glm::distance(light->position(), hitpos);
         Ray lightRay;
-        lightRay.setDirection(light->position() - hitPos);
-        lightRay.setOrigin(hitPos + (bias * surfaceNormal)); 
+        lightRay.setDirection(light->position() - hitpos);
+        lightRay.setOrigin(hitpos + (bias * surfaceNormal)); 
         bool obstructed = false;
         for (SceneObject *p : scene->sceneObjects()) {
             result = p->rayIntersect(lightRay);
@@ -102,7 +104,7 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
             
             // diffuse lighting
             float incidence = glm::dot(surfaceNormal, hitObject->normal(light->position())); 
-            color += (hitObject->diffuse() * hitObject->color() * incidence * illumination);
+            color += (hitObject->diffuse() * objectColor * incidence * illumination);
 
             // specular lighting
             glm::vec3 specularColor = glm::vec3(1.0f, 1.0f, 1.0f); // color of the light
@@ -117,7 +119,7 @@ glm::vec3 shade(Ray &ray, Scene *scene, Primitive *hitObject, float hitDistance,
     if (depth > 0 && hitObject->reflectivity() > 0.0f) {
         Ray reflectRay;
         reflectRay.setDirection(glm::reflect(ray.direction(), surfaceNormal));
-        reflectRay.setOrigin(hitPos + (bias * reflectRay.direction()));
+        reflectRay.setOrigin(hitpos + (bias * reflectRay.direction()));
         color += (hitObject->reflectivity() * trace(reflectRay, scene, depth - 1));
     }
 
@@ -131,7 +133,7 @@ void makeJob(Job *job, const Ray &ray, const glm::vec3 &u, const glm::vec3 &v, c
     job->directionComponents[1] = v;
     job->directionComponents[2] = w;
     job->scene  = scene;
-    job->depth  = 8;
+    job->depth  = 3;
     job->color  = colorPtr;
 }
 

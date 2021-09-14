@@ -8,6 +8,7 @@
 #include <glm/vec3.hpp>
 
 #include "Mesh.hpp"
+#include "SolidTexture.hpp"
 
 const int BUFFER_SIZE = 128;
 
@@ -34,8 +35,9 @@ void Mesh::computeBoundingBox() {
     m_boundingBox.setBoundaries(min, max);
 }
 
-Mesh::Mesh(const std::string &filepath) {   
-    Material material = { glm::vec3(0.5f, 0.5f, 0.5f), 0.1f, 0.9f, 0.9f, 1.0f, 128 };
+Mesh::Mesh(const std::string &filepath) {
+    SolidTexture *texture = new SolidTexture(glm::vec3(0.5f, 0.5f, 0.5f));   
+    Material material = { texture, 0.1f, 0.9f, 0.9f, 1.0f, 128 };
     
     std::ifstream meshFile(filepath);
     std::vector<glm::vec3> vertices;

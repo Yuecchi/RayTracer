@@ -2,8 +2,9 @@
 
 Primitive::Primitive() = default;
 
-glm::vec3 &Primitive::color() {
-    return m_material.color;
+void Primitive::color(glm::vec3 &hitpos, glm::vec3 *result) {
+    static glm::vec2 v = glm::vec2(0.0f);
+    m_material.texture->color(v, result);
 }
 
 float Primitive::ambience() {
